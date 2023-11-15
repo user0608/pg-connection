@@ -1,5 +1,7 @@
 ## PG CONNECTION
 
+This is a library designed to simplify the management of database connections using Gorm in PostgreSQL. It focuses on the use of contexts to handle transactions, thereby simplifying the Gorm handling.
+
 Esta es una librería diseñada para facilitar la gestión de conexiones a bases de datos mediante Gorm en PostgreSQL. Se centra en el uso de contextos para administrar las transacciones, simplificando así el manejo de Gorm.
 
 ## Open Connection

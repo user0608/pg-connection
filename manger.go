@@ -12,8 +12,18 @@ import (
 )
 
 func NewConnection(config DBConfigParams) (StorageManager, error) {
-	var conn = connection{config: config}
-	if err := conn.openConnection(); err != nil {
+	var conn = connection{}
+	const layer = "host=%s user=%s password=%s dbname=%s port=%s sslmode=disable"
+	var dsn = fmt.Sprintf(layer, config.DBHost, config.DBUsername, config.DBPassword, config.DBName, config.DBPort)
+	if err := conn.openConnection(dsn, config.DBLogLevel); err != nil {
+		return nil, err
+	}
+	return &conn, nil
+}
+
+func NewConnectionWithString(dsn string, gormLogLevel string) (StorageManager, error) {
+	var conn = connection{}
+	if err := conn.openConnection(dsn, gormLogLevel); err != nil {
 		return nil, err
 	}
 	return &conn, nil
@@ -24,8 +34,8 @@ type key int
 var context_connextion_key key
 
 type connection struct {
-	conn   *gorm.DB
-	config DBConfigParams
+	conn *gorm.DB
+	// config DBConfigParams
 }
 
 func (*connection) level(s string) logger.LogLevel {
@@ -40,11 +50,8 @@ func (*connection) level(s string) logger.LogLevel {
 	return logger.Silent
 }
 
-func (c *connection) openConnection() error {
-	var config = c.config
-	var level = c.level(c.config.DBLogLevel)
-	const layer = "host=%s user=%s password=%s dbname=%s port=%s sslmode=disable"
-	var dsn = fmt.Sprintf(layer, config.DBHost, config.DBUsername, config.DBPassword, config.DBName, config.DBPort)
+func (c *connection) openConnection(dsn string, loglevel string) error {
+	var level = c.level(loglevel)
 	dialector := postgres.Open(dsn)
 	var err error
 	c.conn, err = gorm.Open(dialector, &gorm.Config{
